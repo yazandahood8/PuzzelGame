@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/puzzleRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- Timer Display -->
+    <TextView
+        android:id="@+id/timerText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Time: 60s"
+        android:textSize="18sp"
+        android:textColor="#FFFFFF"
+        android:background="#88000000"
+        android:padding="8dp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="8dp"/>
+
+    <!-- Puzzle Grid -->
+    <GridLayout
+        android:id="@+id/puzzleGrid"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/timerText"
+        android:layout_above="@+id/resetButton"
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        android:padding="0dp"
+        android:layout_margin="0dp"
+        android:background="#000000" />
+
+    <!-- Reset Button -->
+    <Button
+        android:id="@+id/resetButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Reset Puzzle"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="16dp"
+        android:backgroundTint="#FF9800"
+        android:textColor="#FFFFFF"
+        android:elevation="6dp"/>
+</RelativeLayout>

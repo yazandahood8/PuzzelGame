@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "139304039517",
+    "project_id": "puzzelgame-2ea90",
+    "storage_bucket": "puzzelgame-2ea90.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:139304039517:android:181474457d2762dfffc9b4",
+        "android_client_info": {
+          "package_name": "com.example.puzzelgame"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCN-I__VGK5tMB_aUX5THhGWI4l8Bb8qvE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

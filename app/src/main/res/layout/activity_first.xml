@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="24dp"
+    android:background="@drawable/bg3">
+
+    <Button
+        android:id="@+id/btnPuzzle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="🧩 Go to Puzzle"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="16dp"
+        android:layout_centerVertical="true"
+        android:backgroundTint="#2196F3"
+        android:textColor="#FFFFFF" />
+
+    <Button
+        android:id="@+id/btnTrivia"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="❓ Go to Trivia"
+        android:layout_below="@id/btnPuzzle"
+        android:layout_marginTop="16dp"
+        android:backgroundTint="#4CAF50"
+        android:textColor="#FFFFFF" />
+
+    <Button
+        android:id="@+id/btnToggleMusic"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="🔇 Stop Music"
+        android:layout_below="@+id/btnTrivia"
+        android:layout_marginTop="20dp"
+        android:backgroundTint="#FF9800"
+        android:textColor="#FFFFFF" />
+
+
+</RelativeLayout>
