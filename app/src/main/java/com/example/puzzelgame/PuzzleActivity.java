@@ -53,10 +53,17 @@ public class PuzzleActivity extends AppCompatActivity {
         resetButton.setOnClickListener(v -> setupPuzzle());
     //    sound_effects= new int[]{R.raw.amazing, R.raw.welldone};
         sound_effects= new int[]{R.raw.amazing};
-
+        Button solveButton = findViewById(R.id.solveButton);
+        solveButton.setOnClickListener(v -> solvePuzzle());
         setupPuzzle();
     }
-
+    private void solvePuzzle() {
+        currentPieces = Arrays.copyOf(originalPieces, originalPieces.length);
+        showPuzzlePieces();
+        if (countDownTimer != null) countDownTimer.cancel();
+        Toast.makeText(this, "🧠 Puzzle Solved Automatically!", Toast.LENGTH_SHORT).show();
+       // updateUserLevelInFirebase();
+    }
     private void setupPuzzle() {
         if (countDownTimer != null) countDownTimer.cancel();
 
