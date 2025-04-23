@@ -7,9 +7,10 @@ import android.graphics.BitmapFactory;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.util.Log;
 import android.view.DragEvent;
 import android.view.View;
-import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.GridLayout;
 import android.widget.ImageView;
@@ -39,7 +40,9 @@ public class PuzzleActivity extends AppCompatActivity {
     private int[] sound_effects;
 
     private CountDownTimer countDownTimer;
-    private int timeLimit,level;
+    private int timeLimit, level;
+
+    private int imageId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,23 +54,38 @@ public class PuzzleActivity extends AppCompatActivity {
         timerText = findViewById(R.id.timerText);
 
         resetButton.setOnClickListener(v -> setupPuzzle());
-    //    sound_effects= new int[]{R.raw.amazing, R.raw.welldone};
-        sound_effects= new int[]{R.raw.amazing};
+
+        sound_effects = new int[]{R.raw.amazing};
+
         Button solveButton = findViewById(R.id.solveButton);
         solveButton.setOnClickListener(v -> solvePuzzle());
+
+        imageId = getIntent().getIntExtra("imageId", R.drawable.img1);
         setupPuzzle();
     }
+
     private void solvePuzzle() {
         currentPieces = Arrays.copyOf(originalPieces, originalPieces.length);
-        showPuzzlePieces();
-        if (countDownTimer != null) countDownTimer.cancel();
-        Toast.makeText(this, "🧠 Puzzle Solved Automatically!", Toast.LENGTH_SHORT).show();
-       // updateUserLevelInFirebase();
+
+        gridLayout.post(() -> {
+            int layoutWidth = gridLayout.getMeasuredWidth();
+            int layoutHeight = gridLayout.getMeasuredHeight();
+
+            if (layoutWidth == 0 || layoutHeight == 0) {
+                Toast.makeText(this, "Layout not ready", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            drawTiles(layoutWidth / gridSize, layoutHeight / gridSize);
+
+            if (countDownTimer != null) countDownTimer.cancel();
+            Toast.makeText(this, "🧠 Puzzle Solved Automatically!", Toast.LENGTH_SHORT).show();
+        });
     }
+
     private void setupPuzzle() {
         if (countDownTimer != null) countDownTimer.cancel();
 
-        int imageId = getIntent().getIntExtra("imageId", R.drawable.img1);
         gridSize = getIntent().getIntExtra("gridSize", 3);
         timeLimit = getIntent().getIntExtra("timeLimit", 60);
         level = getIntent().getIntExtra("level", 1);
@@ -75,12 +93,35 @@ public class PuzzleActivity extends AppCompatActivity {
         gridLayout.setColumnCount(gridSize);
         gridLayout.setRowCount(gridSize);
 
-        Bitmap image = BitmapFactory.decodeResource(getResources(), imageId);
-        originalPieces = splitImage(image, gridSize);
-        currentPieces = Arrays.copyOf(originalPieces, originalPieces.length);
-        shuffleArray(currentPieces);
-        showPuzzlePieces();
+        waitForLayoutAndDraw();
         startTimer(timeLimit);
+    }
+
+    private void waitForLayoutAndDraw() {
+        ViewTreeObserver vto = gridLayout.getViewTreeObserver();
+        vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                gridLayout.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                int layoutWidth = gridLayout.getWidth();
+                int layoutHeight = gridLayout.getHeight();
+
+                if (layoutWidth == 0 || layoutHeight == 0) {
+                    Log.e("PuzzleLayout", "Layout dimensions invalid!");
+                    return;
+                }
+
+                // 🧠 חיתוך לפי הגודל האמיתי של הגריד
+                Bitmap image = BitmapFactory.decodeResource(getResources(), imageId);
+                Bitmap scaledImage = Bitmap.createScaledBitmap(image, layoutWidth, layoutHeight, true);
+
+                originalPieces = splitImage(scaledImage, gridSize);
+                currentPieces = Arrays.copyOf(originalPieces, originalPieces.length);
+                shuffleArray(currentPieces);
+
+                drawTiles(layoutWidth / gridSize, layoutHeight / gridSize);
+            }
+        });
     }
 
     private void startTimer(int seconds) {
@@ -95,7 +136,7 @@ public class PuzzleActivity extends AppCompatActivity {
             @Override
             public void onFinish() {
                 Toast.makeText(PuzzleActivity.this, "⏰ Time's up!", Toast.LENGTH_LONG).show();
-                gridLayout.removeAllViews(); // disable interaction
+                gridLayout.removeAllViews();
             }
         }.start();
     }
@@ -125,24 +166,23 @@ public class PuzzleActivity extends AppCompatActivity {
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    private void showPuzzlePieces() {
+    private void drawTiles(int tileWidth, int tileHeight) {
         gridLayout.removeAllViews();
-
-        int screenWidth = getResources().getDisplayMetrics().widthPixels;
-        int screenHeight = getResources().getDisplayMetrics().heightPixels;
-
         int spacing = 4;
-        int tileWidth = screenWidth / gridSize - spacing * 2;
-        int tileHeight = screenHeight / gridSize - spacing * 2;
 
         for (int i = 0; i < currentPieces.length; i++) {
             final ImageView tile = new ImageView(this);
+            if (currentPieces[i] == null) {
+                Log.e("PuzzleDraw", "Null tile at index " + i);
+                continue;
+            }
+
             tile.setImageBitmap(currentPieces[i]);
             tile.setScaleType(ImageView.ScaleType.FIT_XY);
 
             GridLayout.LayoutParams params = new GridLayout.LayoutParams();
-            params.width = tileWidth;
-            params.height = tileHeight;
+            params.width = tileWidth - spacing * 2;
+            params.height = tileHeight - spacing * 2;
             params.setMargins(spacing, spacing, spacing, spacing);
             tile.setLayoutParams(params);
             tile.setTag(i);
@@ -163,7 +203,7 @@ public class PuzzleActivity extends AppCompatActivity {
                     currentPieces[draggedIndex] = currentPieces[targetIndex];
                     currentPieces[targetIndex] = temp;
 
-                    showPuzzlePieces();
+                    drawTiles(tileWidth, tileHeight);
 
                     if (isSolved()) {
                         if (countDownTimer != null) countDownTimer.cancel();
@@ -181,17 +221,15 @@ public class PuzzleActivity extends AppCompatActivity {
         for (int i = 0; i < originalPieces.length; i++) {
             if (originalPieces[i] != currentPieces[i]) return false;
         }
-        // puzzle solved, update level
 
         updateUserLevelInFirebase();
-
         return true;
     }
+
     private void updateUserLevelInFirebase() {
         String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
         DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("Users").child(uid).child("level");
 
-        // Increase level by 1 (if not already higher)
         userRef.get().addOnSuccessListener(snapshot -> {
             if (snapshot.exists()) {
                 int currentLevel = snapshot.getValue(Integer.class);
@@ -202,19 +240,16 @@ public class PuzzleActivity extends AppCompatActivity {
                 userRef.setValue(level + 1);
             }
 
-            int randomSound = sound_effects[new java.util.Random().nextInt(sound_effects.length)];
+            int randomSound = sound_effects[new Random().nextInt(sound_effects.length)];
             mediaPlayer = MediaPlayer.create(PuzzleActivity.this, randomSound);
             mediaPlayer.start();
 
-            // Navigate to MainActivity after sound
             mediaPlayer.setOnCompletionListener(mp -> {
                 mp.release();
                 Intent intent = new Intent(PuzzleActivity.this, MainActivity.class);
                 startActivity(intent);
                 finish();
             });
-
         });
     }
-
 }
