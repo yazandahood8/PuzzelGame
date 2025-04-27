@@ -23,7 +23,7 @@ MainActivity extends AppCompatActivity {
     int[] imageIds = new int[20];
     int[] gridSizes = new int[20];
     int[] timeLimits = new int[20];
-
+    int[] scores = new int[20];
     FirebaseAuth mAuth;
     DatabaseReference userRef;
 
@@ -56,8 +56,12 @@ MainActivity extends AppCompatActivity {
             else if (i < 19) { gridSizes[i] = 9; timeLimits[i] = 220 + (i - 17) * 10; }
             else { gridSizes[i] = 10; timeLimits[i] = 240; }
         }
+        for (int i = 0; i < 20; i++) {
+            scores[i]=5*i+1;
+        }
 
-        loadUserLevel();
+
+            loadUserLevel();
         btnTopRanks.setOnClickListener(v ->
                 startActivity(new Intent(MainActivity.this, TopRanksActivity.class)));
     }
@@ -84,6 +88,8 @@ MainActivity extends AppCompatActivity {
                         intent.putExtra("imageId", imageIds[position]);
                         intent.putExtra("gridSize", gridSizes[position]);
                         intent.putExtra("timeLimit", timeLimits[position]);
+                        intent.putExtra("score", scores[position]);
+
                         startActivity(intent);
                     } else {
                         Toast.makeText(this, "🚫 Level locked!", Toast.LENGTH_SHORT).show();

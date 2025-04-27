@@ -40,7 +40,7 @@ public class PuzzleActivity extends AppCompatActivity {
     private int[] sound_effects;
 
     private CountDownTimer countDownTimer;
-    private int timeLimit, level;
+    private int timeLimit, level,score;
 
     private int imageId;
 
@@ -80,8 +80,23 @@ public class PuzzleActivity extends AppCompatActivity {
 
             if (countDownTimer != null) countDownTimer.cancel();
             Toast.makeText(this, "🧠 Puzzle Solved Automatically!", Toast.LENGTH_SHORT).show();
+
+            // Delay before setting up new puzzle
+            new android.os.Handler().postDelayed(() -> {
+                Random rand = new Random();
+                int imageId2;
+                do {
+                    int i = rand.nextInt(20); // assuming you have 20 images (img1, img2, ..., img20)
+                    imageId2 = getResources().getIdentifier("img" + (i + 1), "drawable", getPackageName());
+                } while (imageId == imageId2); // Ensure it's different from current image
+
+                imageId = imageId2;
+                Toast.makeText(PuzzleActivity.this,score+" ",Toast.LENGTH_LONG).show();
+                setupPuzzle();
+            }, 4000); // 4000 milliseconds = 4 seconds delay
         });
     }
+
 
     private void setupPuzzle() {
         if (countDownTimer != null) countDownTimer.cancel();
@@ -89,7 +104,7 @@ public class PuzzleActivity extends AppCompatActivity {
         gridSize = getIntent().getIntExtra("gridSize", 3);
         timeLimit = getIntent().getIntExtra("timeLimit", 60);
         level = getIntent().getIntExtra("level", 1);
-
+        score= getIntent().getIntExtra("score", 1);
         gridLayout.setColumnCount(gridSize);
         gridLayout.setRowCount(gridSize);
 
